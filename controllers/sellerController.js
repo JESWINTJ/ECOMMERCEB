@@ -112,8 +112,7 @@ export const addNewProduct = asyncHandler(async (req, res) => {
     description,
     category,
     price,
-    quantity,
-    product_image
+    quantity
   } = req.body;
 
   if (!product_name || !description || !category || !price || !quantity || !product_image) {
