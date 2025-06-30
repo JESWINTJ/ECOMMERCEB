@@ -13,7 +13,7 @@ import { authenticateUser as protect } from '../middleware/authentication.js';
 const router = express.Router();
 
 // Register & Login
-router.post('/register/buyer', createBuyerAccount);
+router.post('/register', createBuyerAccount);
 router.post('/login', authenticateUser);
 router.post('/logout', logOutUser);  // <-- Added this line
 
