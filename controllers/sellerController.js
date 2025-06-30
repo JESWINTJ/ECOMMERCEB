@@ -91,9 +91,29 @@ export const viewSellerProfile = asyncHandler(async (req, res) => {
     throw new Error("Access denied");
   }
 
-  const { gstNumber, address, isVerified } = user.sellerProfile || {};
-  res.status(200).json({ gstNumber, address, isVerified });
+  const sellerProfile = user.sellerProfile || {};
+  const gstNumber = sellerProfile.gstNumber || '';
+  const isVerified = sellerProfile.isVerified || false;
+  const address = sellerProfile.address || {};
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    gstNumber,
+    isVerified,
+    address: {
+      street: address.street || '',
+      city: address.city || '',
+      pincode: address.pincode || ''
+    },
+    createdAt: user.createdAt
+  });
 });
+
+
 
 /*===============================================
 =          4. Get Seller Products               =
@@ -112,7 +132,8 @@ export const addNewProduct = asyncHandler(async (req, res) => {
     description,
     category,
     price,
-    quantity
+    quantity,
+    product_image
   } = req.body;
 
   if (!product_name || !description || !category || !price || !quantity || !product_image) {
@@ -127,7 +148,6 @@ export const addNewProduct = asyncHandler(async (req, res) => {
     category,
     price,
     quantity,
-    product_image,
   });
 
   res.status(201).json({ message: "Product added", product });
@@ -166,3 +186,41 @@ export const getSellerOrders = asyncHandler(async (req, res) => {
 
   res.status(200).json(orders);
 });
+
+export const updateSellerProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user || !user.role.includes('seller')) {
+    res.status(403);
+    throw new Error("Access denied: Not a seller");
+  }
+
+  // Update basic fields
+  user.name = req.body.name || user.name;
+  user.phone = req.body.phone || user.phone;
+
+  // Update seller profile fields
+  if (req.body.gstNumber) {
+    user.sellerProfile.gstNumber = req.body.gstNumber;
+  }
+
+  if (req.body.address) {
+    user.sellerProfile.address = {
+      ...user.sellerProfile.address,
+      ...req.body.address // street, city, pincode
+    };
+  }
+
+  const updatedUser = await user.save();
+
+  res.status(200).json({
+    message: "Seller profile updated",
+    user: {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      phone: updatedUser.phone,
+      sellerProfile: updatedUser.sellerProfile
+    }
+  });
+});
+
