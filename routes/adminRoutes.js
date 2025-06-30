@@ -5,13 +5,17 @@ import {
   getAllSellers,
   updateUserByAdmin,
   deleteUserByAdmin,
-  getAllOrders,
+  getAllOrders,getAdminProfile,
+  updateAdminProfile
 } from '../controllers/adminController.js';
 
 import { authenticateUser as protect } from '../middleware/authentication.js';
 import { restrictToAdmin as adminOnly } from '../middleware/authentication.js';
+import { registerAdmin, loginAdmin } from '../controllers/adminController.js';
 
 const router = express.Router();
+router.post('/register', registerAdmin);
+router.post('/login', loginAdmin);
 
 // Apply admin protection globally
 router.use(protect, adminOnly);
@@ -45,5 +49,7 @@ router.get('/sellers', getAllSellers);
 ===============================================*/
 // GET /api/admin/orders
 router.get('/orders', getAllOrders);
+router.get('/profile', protect, adminOnly, getAdminProfile);
+router.put('/profile', protect, adminOnly, updateAdminProfile);
 
 export default router;
