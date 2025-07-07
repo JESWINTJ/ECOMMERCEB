@@ -128,30 +128,35 @@ export const getSellerProducts = asyncHandler(async (req, res) => {
 ===============================================*/
 export const addNewProduct = asyncHandler(async (req, res) => {
   const {
-    product_name,
-    description,
+    name,
+    details,
     category,
-    price,
-    quantity,
-    product_image
+    amount,
+    stock
   } = req.body;
 
-  if (!product_name || !description || !category || !price || !quantity || !product_image) {
+  if (!name || !details || !category || !amount || !stock) {
     res.status(400);
     throw new Error("All product fields are required");
   }
 
+  // Get the image URL from Cloudinary
+  const imageUrl = req.file?.path;
+
   const product = await Product.create({
-    seller_id: req.user._id,
-    product_name,
-    description,
+    sellerRef: req.user._id,
+    name,
+    details,
     category,
-    price,
-    quantity,
+    amount,
+    stock,
+    product_image: imageUrl,
   });
 
   res.status(201).json({ message: "Product added", product });
 });
+
+
 
 /*===============================================
 =          6. Update Product                    =
@@ -159,7 +164,7 @@ export const addNewProduct = asyncHandler(async (req, res) => {
 export const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findOne({
     _id: req.params.id,
-    seller_id: req.user._id
+    sellerRef: req.user._id
   });
 
   if (!product) {
@@ -167,14 +172,27 @@ export const updateProduct = asyncHandler(async (req, res) => {
     throw new Error("Product not found or not authorized");
   }
 
-  const fields = ['product_name', 'description', 'category', 'price', 'quantity', 'product_image'];
-  fields.forEach(field => {
-    if (req.body[field]) product[field] = req.body[field];
+  // Update fields based on your schema
+  const fieldsToUpdate = ['name', 'details', 'category', 'amount', 'stock'];
+  fieldsToUpdate.forEach(field => {
+    if (req.body[field] !== undefined) {
+      product[field] = req.body[field];
+    }
   });
 
+  // Update image if file was uploaded
+  if (req.file?.path) {
+    product.product_image = req.file.path;
+  }
+
   const updated = await product.save();
-  res.status(200).json({ message: "Product updated", product: updated });
+
+  res.status(200).json({
+    message: "Product updated successfully",
+    product: updated
+  });
 });
+
 
 /*===============================================
 =          7. Get Seller Orders                 =
