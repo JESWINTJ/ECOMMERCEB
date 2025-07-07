@@ -7,8 +7,13 @@ import adminControlRoutes from './adminRoutes.js';
 import orderServiceRoutes from './orderRoutes.js';
 import cartFeatureRoutes from './cartRoutes.js';
 import productCatalogRoutes from './productRoutes.js';
+import adminAuthRoutes from './adminRoutes.js';
+import addressRoutes from './addressRoutes.js'; // ✅ Add this line
 
 const mainApiRouter = express.Router();
+
+mainApiRouter.use('/admin/auth', adminAuthRoutes);
+mainApiRouter.use('/addresses', addressRoutes); // ✅ Keep structure modular
 
 /* ---------------------- USER & AUTH ---------------------- */
 // Handles registration, login, profile, and address management
