@@ -9,12 +9,12 @@ export const getAllProducts = asyncHandler(async (req, res) => {
   const pageSize = Number(req.query.limit) || 10;
   const page = Number(req.query.page) || 1;
   const keyword = req.query.search
-    ? { product_name: { $regex: req.query.search, $options: 'i' } }
+    ? { name: { $regex: req.query.search, $options: 'i' } }
     : {};
 
   const filter = {
     ...keyword,
-    is_active: true,
+    available: true,
   };
 
   const count = await Product.countDocuments(filter);
@@ -51,23 +51,28 @@ export const getProductById = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 export const addNewProduct = asyncHandler(async (req, res) => {
   const {
-    product_name,
-    description,
+    name,
+    details,
     category,
-    price,
-    quantity
+    amount,
+    stock
   } = req.body;
 
-  const imageUrls = req.files?.map(file => file.path) || [];
+  if (!name || !details || !category || !amount || !stock) {
+    res.status(400);
+    throw new Error("All product fields are required");
+  }
+
+  const imageUrl = req.file?.path || '';
 
   const product = new Product({
-    seller_id: req.user._id,
-    product_name,
-    description,
+    sellerRef: req.user._id,
+    name,
+    details,
     category,
-    price,
-    quantity,
-    product_image: imageUrls,
+    amount,
+    stock,
+    product_image: imageUrl,
   });
 
   const created = await product.save();
@@ -79,30 +84,32 @@ export const addNewProduct = asyncHandler(async (req, res) => {
 =============================================*/
 // @route   PUT /api/products/:id
 export const updateProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findOne({
+    _id: req.params.id,
+    sellerRef: req.user._id
+  });
 
   if (!product) {
     res.status(404);
-    throw new Error('Product not found');
+    throw new Error("Product not found or not authorized");
   }
 
-  if (product.seller_id.toString() !== req.user._id.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to update this product');
-  }
+  const fieldsToUpdate = ['name', 'details', 'category', 'amount', 'stock'];
+  fieldsToUpdate.forEach(field => {
+    if (req.body[field] !== undefined) {
+      product[field] = req.body[field];
+    }
+  });
 
-  product.product_name = req.body.product_name || product.product_name;
-  product.description = req.body.description || product.description;
-  product.category = req.body.category || product.category;
-  product.price = req.body.price || product.price;
-  product.quantity = req.body.quantity || product.quantity;
-
-  if (req.files && req.files.length > 0) {
-    product.product_image = req.files.map(file => file.path);
+  if (req.file?.path) {
+    product.product_image = req.file.path;
   }
 
   const updated = await product.save();
-  res.json(updated);
+  res.status(200).json({
+    message: "Product updated successfully",
+    product: updated
+  });
 });
 
 /*=============================================
@@ -117,7 +124,7 @@ export const removeProduct = asyncHandler(async (req, res) => {
     throw new Error('Product not found');
   }
 
-  if (product.seller_id.toString() !== req.user._id.toString()) {
+  if (product.sellerRef.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to delete this product');
   }
