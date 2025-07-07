@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import crypto from 'crypto'; 
 
 /* --------------------- Address Schema --------------------- */
 const addressSchema = new mongoose.Schema({
