@@ -9,7 +9,7 @@ import {
 import { protect, sellerOnly } from '../middleware/authentication.js';
 
 const router = express.Router();
-
+ 
 // Place a new order
 router.post('/', protect, makeOrder);
 
