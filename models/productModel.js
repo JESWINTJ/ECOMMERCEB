@@ -38,6 +38,11 @@ const productSchema = new mongoose.Schema({
   available: {
     type: Boolean,
     default: true
+  },
+
+  product_image: {
+    type: String,
+    required: false
   }
 
 }, {
