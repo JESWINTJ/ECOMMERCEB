@@ -22,7 +22,7 @@ app.use('/api', router);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error(err.stack); 
   res.status(err.statusCode || 500).json({
     message: err.message || 'Internal Server Error',
   });
