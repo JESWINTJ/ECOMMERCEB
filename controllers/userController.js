@@ -25,13 +25,23 @@ export const createBuyerAccount = asyncHandler(async (req, res) => {
   const user = await User.create({ name, email, phone, password });
 
   if (user) {
+    // ✅ Set cookie on successful registration
+    const token = generateToken(user._id);
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 1000 // 1 hour
+    });
+
     res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone
+        phone: user.phone,
+        role: user.role
       }
     });
   } else {
