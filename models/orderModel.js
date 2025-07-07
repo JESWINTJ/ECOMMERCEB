@@ -27,6 +27,11 @@ const orderSchema = new mongoose.Schema({
     ref: 'User', // Assuming a unified User model
     required: true
   },
+  seller_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // or 'Seller' if you use a separate model
+    required: true
+  },
   deliveryTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Address',
