@@ -9,12 +9,12 @@ import cartFeatureRoutes from './cartRoutes.js';
 import productCatalogRoutes from './productRoutes.js';
 import adminAuthRoutes from './adminRoutes.js';
 import addressRoutes from './addressRoutes.js'; // ✅ Add this line
-
+import reviewRoutes from './reviewRoute.js';
 const mainApiRouter = express.Router();
 
 mainApiRouter.use('/admin/auth', adminAuthRoutes);
 mainApiRouter.use('/addresses', addressRoutes); // ✅ Keep structure modular
-
+mainApiRouter.use('/api/reviews', reviewRoutes);
 /* ---------------------- USER & AUTH ---------------------- */
 // Handles registration, login, profile, and address management
 mainApiRouter.use('/users', userAuthRoutes);
